@@ -3,7 +3,7 @@ use std::io::{self, Write};
 
 fn main() -> Result<(), io::Error> {
     // Uncomment this block to pass the first stage
-    print!("€ ");
+    print!("$ ");
     io::stdout().flush()?;
 
     // Wait for user input
