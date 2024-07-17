@@ -29,6 +29,9 @@ fn handle_user_command(command: &str) {
 
     match command_name {
         "" => {}
+        "echo" => {
+            println!("{command_params}");
+        }
         "exit" => {
             let status_code = i8::from_str(command_params);
             match status_code {
