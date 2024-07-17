@@ -56,6 +56,7 @@ fn handle_type_command(args: &str) {
 fn find_command_path(command: &str) -> Option<String> {
     env!("PATH").split(':').find_map(|dir| {
         let path = format!("{dir}/{command}");
+        println!("{path}, {}", env!("PATH"));
         Path::new(&path).exists().then_some(path)
     })
 }
