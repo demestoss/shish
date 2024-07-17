@@ -37,7 +37,7 @@ fn handle_user_input(input: &str) -> Result<(), io::Error> {
         _ => match find_command_path(command) {
             Some(path) => {
                 let output = Command::new(path)
-                    .args(command_args.split(' '))
+                    .args(command_args.split_whitespace())
                     .output()
                     .expect("failed to execute process");
 
@@ -56,7 +56,7 @@ fn handle_exit_command(args: &str) {
 }
 
 fn handle_type_command(args: &str) {
-    args.split(' ').for_each(|param| match param {
+    args.split_whitespace().for_each(|param| match param {
         "" => {}
         "echo" | "exit" | "type" => println!("{param} is a shell builtin"),
         command => match find_command_path(command) {
