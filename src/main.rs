@@ -25,15 +25,23 @@ fn get_user_input() -> Result<String, io::Error> {
 
 fn handle_user_input(input: &str) {
     let input = input.trim();
-    let (command_name, command_params) = input.split_once(" ").unwrap_or((input, ""));
+    let (command_name, command_args) = input.split_once(" ").unwrap_or((input, ""));
 
     match command_name {
-        "" => (),
-        "echo" => println!("{command_params}"),
+        "echo" => println!("{command_args}"),
         "exit" => {
-            let status_code = i8::from_str(command_params).unwrap_or_default();
+            let status_code = i8::from_str(command_args).unwrap_or_default();
             exit(status_code as i32);
         }
+        "type" => handle_type_command(command_args),
+        "" => (),
         _ => println!("{command_name}: command not found"),
     };
+}
+
+fn handle_type_command(params: &str) {
+    params.split(' ').for_each(|param| match param {
+        "echo" | "exit" | "type" => println!("{param} is a shell builtin"),
+        _ => println!("{param}: not found"),
+    })
 }
