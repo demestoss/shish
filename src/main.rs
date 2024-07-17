@@ -2,14 +2,14 @@ use std::env;
 #[allow(unused_imports)]
 use std::io::{self, Write};
 use std::path::Path;
-use std::process::exit;
+use std::process::{exit, Command};
 use std::str::FromStr;
 
 fn main() -> anyhow::Result<()> {
     loop {
         print_line_start()?;
         let command = get_user_input()?;
-        handle_user_input(&command);
+        handle_user_input(&command)?;
     }
 }
 
@@ -25,7 +25,7 @@ fn get_user_input() -> Result<String, io::Error> {
     Ok(input)
 }
 
-fn handle_user_input(input: &str) {
+fn handle_user_input(input: &str) -> Result<(), io::Error> {
     let input = input.trim();
     let (command, command_args) = input.split_once(" ").unwrap_or((input, ""));
 
@@ -34,8 +34,20 @@ fn handle_user_input(input: &str) {
         "echo" => println!("{command_args}"),
         "exit" => handle_exit_command(command_args),
         "type" => handle_type_command(command_args),
-        _ => println!("{command}: command not found"),
+        _ => match find_command_path(command) {
+            Some(path) => {
+                let output = Command::new(path)
+                    .args(command_args.split(' '))
+                    .output()
+                    .expect("failed to execute process");
+
+                io::stdout().write_all(&output.stdout)?;
+                io::stderr().write_all(&output.stderr)?;
+            }
+            None => println!("{command}: command not found"),
+        },
     };
+    Ok(())
 }
 
 fn handle_exit_command(args: &str) {
