@@ -29,7 +29,7 @@ fn handle_user_input(input: &str) {
     let input = input.trim();
     let (command, command_args) = input.split_once(" ").unwrap_or((input, ""));
 
-    match handle_command(command, command_args) {
+    match handle_command(command, command_args.trim()) {
         Ok(_) => {}
         Err(err) => eprintln!("{command}: {err}"),
     }
@@ -87,6 +87,10 @@ fn handle_pwd_command() -> Result<(), io::Error> {
 }
 
 fn handle_cd_command(args: &str) -> Result<(), io::Error> {
+    if args.is_empty() {
+        return Ok(());
+    }
+
     match check_path_exists(args) {
         None => println!("cd: {args}: No such file or directory"),
         Some(path) => env::set_current_dir(path)?,
