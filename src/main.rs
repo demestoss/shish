@@ -1,3 +1,4 @@
+use std::env;
 #[allow(unused_imports)]
 use std::io::{self, Write};
 use std::path::Path;
@@ -54,7 +55,9 @@ fn handle_type_command(args: &str) {
 }
 
 fn find_command_path(command: &str) -> Option<String> {
-    env!("PATH").split(':').find_map(|dir| {
+    let path_env = env::var("PATH").unwrap();
+
+    path_env.split(':').find_map(|dir| {
         let path = format!("{dir}/{command}");
         Path::new(&path).exists().then_some(path)
     })
