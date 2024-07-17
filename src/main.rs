@@ -92,8 +92,8 @@ fn handle_cd_command(args: &str) -> Result<(), io::Error> {
     }
 
     match check_path_exists(args) {
-        None => println!("cd: {args}: No such file or directory"),
         Some(path) => env::set_current_dir(path)?,
+        None => println!("cd: {args}: No such file or directory"),
     };
     Ok(())
 }
