@@ -1,5 +1,6 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
+use std::path::Path;
 use std::process::exit;
 use std::str::FromStr;
 
@@ -28,21 +29,33 @@ fn handle_user_input(input: &str) {
     let (command, command_args) = input.split_once(" ").unwrap_or((input, ""));
 
     match command {
-        "echo" => println!("{command_args}"),
-        "exit" => {
-            let status_code = i8::from_str(command_args).unwrap_or_default();
-            exit(status_code as i32);
-        }
-        "type" => handle_type_command(command_args),
         "" => {}
+        "echo" => println!("{command_args}"),
+        "exit" => handle_exit_command(command_args),
+        "type" => handle_type_command(command_args),
         _ => println!("{command}: command not found"),
     };
 }
 
-fn handle_type_command(params: &str) {
-    params.split(' ').for_each(|param| match param {
-        "echo" | "exit" | "type" => println!("{param} is a shell builtin"),
+fn handle_exit_command(args: &str) {
+    let status_code = i8::from_str(args).unwrap_or_default();
+    exit(status_code as i32);
+}
+
+fn handle_type_command(args: &str) {
+    args.split(' ').for_each(|param| match param {
         "" => {}
-        _ => println!("{param}: not found"),
+        "echo" | "exit" | "type" => println!("{param} is a shell builtin"),
+        command => match find_command_path(command) {
+            Some(path) => println!("{command} is {path}"),
+            None => println!("{param}: not found"),
+        },
+    })
+}
+
+fn find_command_path(command: &str) -> Option<String> {
+    env!("PATH").split(':').find_map(|dir| {
+        let path = format!("{dir}/{command}");
+        Path::new(&path).exists().then_some(path)
     })
 }
