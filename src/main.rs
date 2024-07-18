@@ -35,7 +35,7 @@ fn handle_user_input(input: &str) {
     }
 }
 
-fn handle_command(command: &str, args: &str) -> Result<(), io::Error> {
+fn handle_command(command: &str, args: &str) -> anyhow::Result<()> {
     match command {
         "" => {}
         "exit" => handle_exit_command(args),
@@ -86,16 +86,28 @@ fn handle_pwd_command() -> Result<(), io::Error> {
     Ok(())
 }
 
-fn handle_cd_command(args: &str) -> Result<(), io::Error> {
+fn handle_cd_command(args: &str) -> anyhow::Result<()> {
     if args.is_empty() {
         return Ok(());
     }
 
-    match check_path_exists(args) {
+    let path = replace_home_dir(args)?;
+
+    match check_path_exists(&path) {
         Some(path) => env::set_current_dir(path)?,
         None => println!("cd: {args}: No such file or directory"),
     };
     Ok(())
+}
+
+fn replace_home_dir(path: &str) -> anyhow::Result<String> {
+    match path.starts_with('~') {
+        true => {
+            let home_dir = env::var("HOME")?;
+            Ok(home_dir + &path[1..])
+        }
+        false => Ok(path.to_string()),
+    }
 }
 
 fn handle_external_command(command: &str, args: &str) -> Result<(), io::Error> {
