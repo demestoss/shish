@@ -1,15 +1,35 @@
-#[allow(unused_imports)]
+mod commands;
+mod path_utils;
+
+use clap::Parser;
 use std::io::{self, Write};
-use std::path::Path;
-use std::process::Command;
-use std::str::FromStr;
-use std::{env, process};
 
 fn main() -> anyhow::Result<()> {
     loop {
         print_line_start()?;
         let command = get_user_input()?;
         handle_user_input(&command);
+    }
+}
+
+#[derive(Debug, Parser)]
+enum ShishCli {
+    Exit(commands::exit::Command),
+    Type(commands::r#type::Command),
+    Echo(commands::echo::Command),
+    Pwd(commands::pwd::Command),
+    Cd(commands::cd::Command),
+}
+
+impl ShishCli {
+    fn execute(&self) -> anyhow::Result<()> {
+        match self {
+            ShishCli::Cd(c) => c.execute(),
+            ShishCli::Exit(c) => Ok(c.execute()),
+            ShishCli::Type(c) => Ok(c.execute()),
+            ShishCli::Echo(c) => Ok(c.execute()),
+            ShishCli::Pwd(c) => c.execute(),
+        }
     }
 }
 
@@ -27,97 +47,24 @@ fn get_user_input() -> Result<String, io::Error> {
 
 fn handle_user_input(input: &str) {
     let input = input.trim();
-    let (command, command_args) = input.split_once(" ").unwrap_or((input, ""));
 
-    match handle_command(command, command_args.trim()) {
+    if input.is_empty() {
+        return;
+    }
+
+    let (command, _) = input.split_once(" ").unwrap_or((input, ""));
+
+    let mut args = vec!["shish"];
+    args.extend(input.split(" "));
+    let parsed_command = ShishCli::try_parse_from(args);
+
+    let command_result = match parsed_command {
+        Ok(c) => c.execute(),
+        Err(e) => commands::external::Command::new(&input).execute(),
+    };
+
+    match command_result {
         Ok(_) => {}
         Err(err) => eprintln!("{command}: {err}"),
     }
-}
-
-fn handle_command(command: &str, args: &str) -> anyhow::Result<()> {
-    match command {
-        "" => {}
-        "exit" => handle_exit_command(args),
-        "type" => handle_type_command(args),
-        "echo" => handle_echo_command(args),
-        "pwd" => handle_pwd_command()?,
-        "cd" => handle_cd_command(args)?,
-        _ => handle_external_command(command, args)?,
-    };
-    Ok(())
-}
-
-fn handle_exit_command(args: &str) {
-    let status_code = i8::from_str(args).unwrap_or_default();
-    process::exit(status_code as i32);
-}
-
-fn handle_type_command(args: &str) {
-    args.split_whitespace().for_each(|param| match param {
-        "" => {}
-        "echo" | "exit" | "type" | "pwd" | "cd" => println!("{param} is a shell builtin"),
-        command => match find_command_path(command) {
-            Some(path) => println!("{command} is {path}"),
-            None => println!("{param}: not found"),
-        },
-    })
-}
-
-fn find_command_path(command: &str) -> Option<String> {
-    let path_env = env::var("PATH").ok()?;
-    path_env.split(':').find_map(|dir| {
-        let path = format!("{dir}/{command}");
-        check_path_exists(&path)
-    })
-}
-
-fn check_path_exists(path: &str) -> Option<String> {
-    Path::new(&path).exists().then_some(path.to_string())
-}
-
-fn handle_echo_command(args: &str) {
-    println!("{args}")
-}
-
-fn handle_pwd_command() -> Result<(), io::Error> {
-    let path = env::current_dir()?;
-    println!("{}", path.display());
-    Ok(())
-}
-
-fn handle_cd_command(args: &str) -> anyhow::Result<()> {
-    if args.is_empty() {
-        return Ok(());
-    }
-
-    let path = replace_home_dir(args)?;
-
-    match check_path_exists(&path) {
-        Some(path) => env::set_current_dir(path)?,
-        None => println!("cd: {args}: No such file or directory"),
-    };
-    Ok(())
-}
-
-fn replace_home_dir(path: &str) -> anyhow::Result<String> {
-    match path.starts_with('~') {
-        true => {
-            let home_dir = env::var("HOME")?;
-            Ok(home_dir + &path[1..])
-        }
-        false => Ok(path.to_string()),
-    }
-}
-
-fn handle_external_command(command: &str, args: &str) -> Result<(), io::Error> {
-    match find_command_path(command) {
-        Some(path) => {
-            let output = Command::new(path).args(args.split_whitespace()).output()?;
-            io::stdout().write_all(&output.stdout)?;
-            io::stderr().write_all(&output.stderr)?;
-        }
-        None => println!("{command}: command not found"),
-    };
-    Ok(())
 }
