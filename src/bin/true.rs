@@ -1,6 +1,7 @@
 use assert_cmd::Command;
 
 pub fn main() {
+    println!("{:?}", std::env::args());
     std::process::exit(0);
 }
 
