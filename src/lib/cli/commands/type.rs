@@ -1,4 +1,4 @@
-use crate::path_utils::find_command_path;
+use crate::cli::path_utils::find_command_path;
 use clap::Parser;
 
 #[derive(Parser, Debug)]
@@ -12,9 +12,11 @@ impl Command {
             .split_whitespace()
             .for_each(|param| match param {
                 "" => {}
-                "echo" | "exit" | "type" | "pwd" | "cd" => println!("{param} is a shell builtin"),
+                "echo" | "exit" | "type" | "pwd" | "cd" | "true" | "false" | "mkdir" => {
+                    println!("{param} is a shell builtin")
+                }
                 command => match find_command_path(command) {
-                    Some(path) => println!("{command} is {path}"),
+                    Some(path) => println!("{command} is {}", path.display()),
                     None => println!("{param}: not found"),
                 },
             })
