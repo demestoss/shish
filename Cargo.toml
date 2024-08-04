@@ -28,3 +28,4 @@ clap = { version = "4.5.13", features = ["derive"] }                            
 
 [dev-dependencies]
 assert_cmd = "2.0.15"
+pretty_assertions = "1.4.0"
