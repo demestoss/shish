@@ -3,20 +3,30 @@ use colorful::{Colorful, RGB};
 use rand::Rng;
 
 #[derive(Parser, Debug)]
+#[command(about = "Prints text to the stdout")]
 pub(crate) struct Command {
-    #[clap(short = 'r')]
+    #[clap(short = 'r', help = "Prints in random color")]
     random_color: bool,
+    #[clap(short = 'n', help = "Omit print newline")]
+    no_newline: bool,
 
     line: Vec<String>,
 }
 
 impl Command {
     pub(crate) fn execute(&self) {
-        if self.random_color {
+        let output = self.line.join(" ");
+        let output = if self.random_color {
             let (r, g, b) = random_color();
-            println!("{}", self.line.join(" ").gradient(RGB::new(r, g, b)));
+            output.gradient(RGB::new(r, g, b)).to_string()
         } else {
-            println!("{}", self.line.join(" "));
+            output
+        };
+
+        if self.no_newline {
+            print!("{}", output);
+        } else {
+            println!("{}", output);
         }
     }
 }

@@ -1,3 +1,4 @@
+use clap::error::ErrorKind;
 use clap::Parser;
 use std::thread;
 
@@ -6,9 +7,9 @@ mod path_utils;
 
 #[derive(Debug, Parser)]
 enum SpecialBuildin {
+    Echo(commands::echo::Command),
     Exit(commands::exit::Command),
     Type(commands::r#type::Command),
-    Echo(commands::echo::Command),
     Pwd(commands::pwd::Command),
     Cd(commands::cd::Command),
     Mkdir(commands::mkdir::Command),
@@ -38,6 +39,7 @@ pub fn handle_user_input(input: &str) {
 
     let mut args = vec!["shish".to_owned()];
     args.extend(shlex::split(input).unwrap_or(Vec::new()));
+
     let parsed_command = SpecialBuildin::try_parse_from(&args);
 
     let command_result = match parsed_command {
@@ -45,9 +47,15 @@ pub fn handle_user_input(input: &str) {
             let handler = thread::spawn(move || c.execute());
             handler.join().expect("Unexpect process exit")
         }
-        Err(_) => commands::external::Command::new(&input)
-            .execute()
-            .map(|_| ()),
+        Err(e) => match e.kind() {
+            ErrorKind::DisplayHelp => {
+                println!("{}", e);
+                Ok(())
+            }
+            _ => commands::external::Command::new(&input)
+                .execute()
+                .map(|_| ()),
+        },
     };
 
     match command_result {
