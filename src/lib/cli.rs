@@ -36,9 +36,9 @@ pub fn handle_user_input(input: &str) {
 
     let (command, _) = input.split_once(" ").unwrap_or((input, ""));
 
-    let mut args = vec!["shish"];
-    args.extend(input.split(" "));
-    let parsed_command = SpecialBuildin::try_parse_from(args);
+    let mut args = vec!["shish".to_owned()];
+    args.extend(shlex::split(input).unwrap_or(Vec::new()));
+    let parsed_command = SpecialBuildin::try_parse_from(&args);
 
     let command_result = match parsed_command {
         Ok(c) => {

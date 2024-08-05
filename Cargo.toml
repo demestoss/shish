@@ -25,6 +25,9 @@ anyhow = "1.0.68"                                # error handling
 bytes = "1.3.0"                                  # helps manage buffers
 thiserror = "1.0.38"
 clap = { version = "4.5.13", features = ["derive"] }                             # error handling
+shlex = "1.3.0"
+rand = "0.8.5"
+colorful = "0.3.2"
 
 [dev-dependencies]
 assert_cmd = "2.0.15"
