@@ -1,4 +1,4 @@
-use crate::cli::path_utils::replace_home_dir;
+use crate::path_utils::replace_home_dir;
 use clap::Parser;
 use std::path::PathBuf;
 

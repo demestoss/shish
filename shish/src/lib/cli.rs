@@ -1,13 +1,9 @@
+use crate::commands;
 use clap::error::ErrorKind;
 use clap::Parser;
-use std::thread;
-
-mod commands;
-mod path_utils;
 
 #[derive(Debug, Parser)]
 enum SpecialBuildin {
-    Echo(commands::echo::Command),
     Exit(commands::exit::Command),
     Type(commands::r#type::Command),
     Pwd(commands::pwd::Command),
@@ -21,7 +17,6 @@ impl SpecialBuildin {
             SpecialBuildin::Cd(c) => c.execute(),
             SpecialBuildin::Exit(c) => Ok(c.execute()),
             SpecialBuildin::Type(c) => Ok(c.execute()),
-            SpecialBuildin::Echo(c) => Ok(c.execute()),
             SpecialBuildin::Pwd(c) => c.execute(),
             SpecialBuildin::Mkdir(c) => c.execute(),
         }
@@ -44,17 +39,21 @@ pub fn handle_user_input(input: &str) {
 
     let command_result = match parsed_command {
         Ok(c) => {
-            let handler = thread::spawn(move || c.execute());
-            handler.join().expect("Unexpect process exit")
+            let result = c.execute();
+            result
         }
-        Err(e) => match e.kind() {
+        Err(err) => match err.kind() {
             ErrorKind::DisplayHelp => {
-                println!("{}", e);
+                println!("{}", err);
                 Ok(())
             }
-            _ => commands::external::Command::new(&input)
-                .execute()
-                .map(|_| ()),
+            _ => {
+                let _ = err.exit_code();
+
+                commands::external::Command::new(&input)
+                    .execute()
+                    .map(|_| ())
+            }
         },
     };
 

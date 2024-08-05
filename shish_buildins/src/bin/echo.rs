@@ -4,7 +4,7 @@ use rand::Rng;
 
 #[derive(Parser, Debug)]
 #[command(about = "Prints text to the stdout")]
-pub(crate) struct Command {
+pub struct Command {
     #[clap(short = 'r', help = "Prints in random color")]
     random_color: bool,
     #[clap(short = 'n', help = "Omit print newline")]
@@ -14,7 +14,7 @@ pub(crate) struct Command {
 }
 
 impl Command {
-    pub(crate) fn execute(&self) {
+    pub fn invoke(&self) {
         let output = self.line.join(" ");
         let output = if self.random_color {
             let (r, g, b) = random_color();
@@ -34,4 +34,9 @@ impl Command {
 fn random_color() -> (u8, u8, u8) {
     let mut rng = rand::thread_rng();
     (rng.gen(), rng.gen(), rng.gen())
+}
+
+pub fn main() {
+    let c = Command::parse();
+    c.invoke();
 }

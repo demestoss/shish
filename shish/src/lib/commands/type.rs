@@ -1,4 +1,4 @@
-use crate::cli::path_utils::find_command_path;
+use crate::path_utils::find_command_path;
 use clap::Parser;
 
 #[derive(Parser, Debug)]

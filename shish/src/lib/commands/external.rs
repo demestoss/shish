@@ -1,5 +1,4 @@
-use crate::cli::path_utils::find_command_path;
-use std::io::Write;
+use crate::path_utils::find_command_path;
 use std::path::{Path, PathBuf};
 use std::{env, io};
 
@@ -29,10 +28,10 @@ impl Command {
             Some(path) => {
                 let output = std::process::Command::new(path)
                     .args(args.split_whitespace())
-                    .output()?;
-                io::stdout().write_all(&output.stdout)?;
-                io::stderr().write_all(&output.stderr)?;
-                Ok(output.status.code().unwrap_or(1))
+                    .stdout(io::stdout())
+                    .stderr(io::stderr())
+                    .status()?;
+                Ok(output.code().unwrap_or(1))
             }
             None => {
                 println!("{command}: command not found");
@@ -44,7 +43,7 @@ impl Command {
 
 fn find_buildin_path(command: &str) -> Option<PathBuf> {
     match command {
-        "true" | "false" => Some(get_buildin_path(&command)),
+        "true" | "false" | "echo" => Some(get_buildin_path(&command)),
         _ => None,
     }
 }
@@ -53,7 +52,7 @@ fn get_buildin_path(bin: &str) -> PathBuf {
     if let Ok(exec_path) = env::current_exe() {
         let mut binary_dir = exec_path
             .parent()
-            .unwrap_or_else(|| Path::new("."))
+            .unwrap_or_else(|| Path::new("../../../.."))
             .to_path_buf();
         binary_dir.push(&bin);
         binary_dir

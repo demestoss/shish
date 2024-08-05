@@ -4,7 +4,13 @@ use clap::Parser;
 #[command(about = "Always returns success 0 exit code")]
 struct Command {}
 
+impl Command {
+    fn invoke(&self) {
+        std::process::exit(0);
+    }
+}
+
 pub fn main() {
-    let _ = Command::parse();
-    std::process::exit(0);
+    let c = Command::parse();
+    c.invoke();
 }

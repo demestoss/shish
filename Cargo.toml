@@ -1,34 +1,6 @@
-[package]
-name = "shish"
-version = "0.1.0"
-authors = ["Dmitriy Popov <me@demestoss.com>"]
-edition = "2021"
-
-[lib]
-name = "shish"
-path = "src/lib/mod.rs"
-
-[[bin]]
-name = "shish"
-path = "src/bin/shish.rs"
-
-[[bin]]
-name = "true"
-path = "src/bin/true.rs"
-
-[[bin]]
-name = "false"
-path = "src/bin/false.rs"
-
-[dependencies]
-anyhow = "1.0.68"                                # error handling
-bytes = "1.3.0"                                  # helps manage buffers
-thiserror = "1.0.38"
-clap = { version = "4.5.13", features = ["derive"] }                             # error handling
-shlex = "1.3.0"
-rand = "0.8.5"
-colorful = "0.3.2"
-
-[dev-dependencies]
-assert_cmd = "2.0.15"
-pretty_assertions = "1.4.0"
+[workspace]
+resolver = "2"
+members = [
+    "shish",
+    "shish_buildins"
+]
