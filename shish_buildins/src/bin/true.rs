@@ -14,3 +14,15 @@ pub fn main() {
     let c = Command::parse();
     c.invoke();
 }
+
+#[cfg(test)]
+mod tests {
+    use assert_cmd::Command;
+
+    #[test]
+    fn true_success() -> anyhow::Result<()> {
+        let mut cmd = Command::cargo_bin("true")?;
+        cmd.assert().success();
+        Ok(())
+    }
+}
