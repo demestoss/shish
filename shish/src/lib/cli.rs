@@ -1,8 +1,10 @@
-use crate::commands;
+use std::process::Stdio;
+
 use clap::error::ErrorKind;
 use clap::Parser;
-use std::process;
-use std::process::{Child, Stdio};
+
+use crate::commands;
+use crate::commands::external::execute_external_command;
 
 #[derive(Debug, Parser)]
 enum SpecialBuildin {
@@ -69,26 +71,15 @@ pub fn handle_user_input(input: &str) {
     }
 }
 
-fn execute_external_command(
-    args: &[String],
-    previous: Option<Child>,
-    stdout: Stdio,
-) -> Option<Child> {
-    let stdin = previous.map_or(Stdio::inherit(), |output: Child| {
-        Stdio::from(output.stdout.unwrap())
-    });
-    let output = process::Command::new(&args[0])
-        .args(&args[1..])
-        .stdin(stdin)
-        .stdout(stdout)
-        .spawn();
-    match output {
-        Ok(output) => Some(output),
-        Err(e) => {
-            eprintln!("{}", e);
-            None
-        }
+fn get_stdout(args: &mut [String]) -> Stdio {
+    let Some(arg) = args.get(args.len() - 2) else {
+        return Stdio::inherit();
+    };
+    if arg != ">" {
+        return Stdio::inherit();
     }
+
+    let file_name = args.pop();
 }
 
 fn execute_command(args: &[String]) -> Option<()> {

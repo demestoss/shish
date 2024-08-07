@@ -1,57 +1,42 @@
 use crate::path_utils::find_command_path;
 use std::path::{Path, PathBuf};
-use std::{env, io};
+use std::process::{Child, Stdio};
+use std::{env, process};
 
-#[derive(Debug)]
-pub(crate) struct Command {
-    input: String,
+pub(crate) fn execute_external_command(
+    args: &[String],
+    previous: Option<Child>,
+    stdout: Stdio,
+) -> Option<Child> {
+    let Some(command) = get_command_path(&args[0]) else {
+        eprintln!("{command}: command not found");
+        None
+    };
+    let stdin = previous.map_or(Stdio::inherit(), |output: Child| {
+        Stdio::from(output.stdout.unwrap())
+    });
+    let output = process::Command::new(command)
+        .args(&args[1..])
+        .stdin(stdin)
+        .stdout(stdout)
+        .spawn();
+    match output {
+        Ok(output) => Some(output),
+        Err(e) => {
+            eprintln!("{}", e);
+            None
+        }
+    }
 }
 
-impl Command {
-    pub(crate) fn new(input: &str) -> Self {
-        Self {
-            input: input.to_owned(),
-        }
-    }
+fn get_command_path(command_name: &str) -> Option<PathBuf> {
+    let path = if let Some(path) = find_buildin_path(&command_name) {
+        Some(path)
+    } else {
+        find_command_path(&command_name)
+    };
 
-    pub(crate) fn get_command_path(&self) -> Option<PathBuf> {
-        let input = self.input.trim();
-        let (command, args) = input.split_once(" ").unwrap_or((input, ""));
-
-        let path = if let Some(path) = find_buildin_path(&command) {
-            Some(path)
-        } else {
-            find_command_path(&command)
-        };
-
-        return path;
-    }
-
-    pub(crate) fn execute(&self) -> anyhow::Result<i32> {
-        let input = self.input.trim();
-        let (command, args) = input.split_once(" ").unwrap_or((input, ""));
-
-        let path = if let Some(path) = find_buildin_path(&command) {
-            Some(path)
-        } else {
-            find_command_path(&command)
-        };
-
-        match path {
-            Some(path) => {
-                let output = std::process::Command::new(path)
-                    .args(args.split_whitespace())
-                    .stdout(io::stdout())
-                    .stderr(io::stderr())
-                    .status()?;
-                Ok(output.code().unwrap_or(1))
-            }
-            None => {
-                eprintln!("{command}: command not found");
-                Ok(0)
-            }
-        }
-    }
+    return path;
 }
 
 fn find_buildin_path(command: &str) -> Option<PathBuf> {
