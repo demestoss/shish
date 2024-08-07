@@ -1,6 +1,6 @@
+use crate::path_utils::replace_home_dir;
 use clap::Parser;
 use std::path::PathBuf;
-use crate::path_utils::replace_home_dir;
 
 #[derive(Parser, Debug)]
 pub(crate) struct Command {

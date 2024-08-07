@@ -14,6 +14,19 @@ impl Command {
         }
     }
 
+    pub(crate) fn get_command_path(&self) -> Option<PathBuf> {
+        let input = self.input.trim();
+        let (command, args) = input.split_once(" ").unwrap_or((input, ""));
+
+        let path = if let Some(path) = find_buildin_path(&command) {
+            Some(path)
+        } else {
+            find_command_path(&command)
+        };
+
+        return path;
+    }
+
     pub(crate) fn execute(&self) -> anyhow::Result<i32> {
         let input = self.input.trim();
         let (command, args) = input.split_once(" ").unwrap_or((input, ""));
@@ -34,7 +47,7 @@ impl Command {
                 Ok(output.code().unwrap_or(1))
             }
             None => {
-                println!("{command}: command not found");
+                eprintln!("{command}: command not found");
                 Ok(0)
             }
         }

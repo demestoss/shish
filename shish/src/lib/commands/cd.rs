@@ -20,7 +20,7 @@ impl Command {
         if path_exists {
             std::env::set_current_dir(path)?;
         } else {
-            println!("cd: {}: No such file or directory", path.display());
+            eprintln!("cd: {}: No such file or directory", path.display());
         }
         Ok(())
     }

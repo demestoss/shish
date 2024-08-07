@@ -17,7 +17,7 @@ impl Command {
                 }
                 command => match find_command_path(command) {
                     Some(path) => println!("{command} is {}", path.display()),
-                    None => println!("{param}: not found"),
+                    None => eprintln!("{param}: not found"),
                 },
             })
     }
