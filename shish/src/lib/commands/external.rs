@@ -1,4 +1,5 @@
 use crate::path_utils::find_command_path;
+use anyhow::bail;
 use std::path::{Path, PathBuf};
 use std::process::{Child, Stdio};
 use std::{env, process};
@@ -7,10 +8,9 @@ pub(crate) fn execute_external_command(
     args: &[String],
     previous: Option<Child>,
     stdout: Stdio,
-) -> Option<Child> {
+) -> anyhow::Result<Child> {
     let Some(command) = get_command_path(&args[0]) else {
-        eprintln!("{}: command not found", args[0]);
-        return None;
+        bail!("{}: command not found", args[0])
     };
     let stdin = previous.map_or(Stdio::inherit(), |output: Child| {
         Stdio::from(output.stdout.unwrap())
@@ -21,10 +21,9 @@ pub(crate) fn execute_external_command(
         .stdout(stdout)
         .spawn();
     match output {
-        Ok(output) => Some(output),
+        Ok(output) => Ok(output),
         Err(e) => {
-            eprintln!("{}", e);
-            None
+            bail!("{}", e)
         }
     }
 }

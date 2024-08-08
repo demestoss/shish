@@ -42,30 +42,71 @@ pub fn handle_user_input(input: &str) {
 
     for arg in args {
         match arg.as_str() {
-            "|" => {
-                match execute_command(&command_args, previous_command, Stdio::piped()) {
-                    Some(command) => previous_command = Some(command),
-                    None => previous_command = None,
-                }
-                command_args.clear();
-            }
-            "&&" => {
-                execute_command(&command_args, previous_command, Stdio::inherit());
-                previous_command = None;
-                command_args.clear();
-            }
+            "|" => handle_pipe(&mut command_args, &mut previous_command),
+            "&&" => handle_and(&mut command_args, &mut previous_command),
+            "||" => handle_or(&mut command_args, &mut previous_command),
             _ => command_args.push(arg),
         }
     }
 
-    if command_args.len() > 0 {
-        match get_stdout(&mut command_args) {
-            Ok(stdout) => {
-                execute_command(&command_args, previous_command, stdout).map(|mut c| c.wait());
-            }
+    if !command_args.is_empty() {
+        match get_stdout(&mut command_args)
+            .map(|stdout| execute_command(&command_args, previous_command, stdout))
+        {
             Err(e) => eprintln!("{e}"),
+            Ok(Some(c)) => c.wait(),
+            _ => {}
         };
     }
+}
+
+fn handle_pipe(command_args: &mut Vec<String>, previous_command: &mut Option<Child>) {
+    match execute_command(command_args, previous_command.take(), Stdio::piped()) {
+        Err(e) => {
+            eprintln!("{e}");
+            *previous_command = None;
+        }
+        Ok(c) => *previous_command = c,
+    }
+    command_args.clear();
+}
+
+fn handle_and(command_args: &mut Vec<String>, previous_command: &mut Option<Child>) {
+    match execute_command(command_args, previous_command.take(), Stdio::inherit()) {
+        Err(e) => {
+            eprintln!("{e}");
+            return;
+        }
+        Ok(None) => {
+            // TODO: internal buildins are not working here, always good path
+        }
+        Ok(Some(mut c)) => match c.wait() {
+            Err(e) | Ok(st) if !st.success() => {
+                eprintln!("{e}");
+                return;
+            }
+            _ => {}
+        },
+    }
+    *previous_command = None;
+    command_args.clear();
+}
+
+fn handle_or(command_args: &mut Vec<String>, previous_command: &mut Option<Child>) {
+    match execute_command(command_args, previous_command.take(), Stdio::inherit()) {
+        Err(e) => eprintln!("{e}"),
+        Ok(None) => {
+            // TODO: internal buildins are not working here, always good path
+        }
+        Ok(Some(mut c)) => match c.wait() {
+            Err(e) | Ok(st) if !st.success() => eprintln!("{e}"),
+            _ => {
+                return;
+            }
+        },
+    }
+    *previous_command = None;
+    command_args.clear();
 }
 
 fn get_stdout(args: &mut Vec<String>) -> anyhow::Result<Stdio> {
@@ -90,7 +131,11 @@ fn get_stdout(args: &mut Vec<String>) -> anyhow::Result<Stdio> {
     }
 }
 
-fn execute_command(args: &Vec<String>, previous: Option<Child>, stdout: Stdio) -> Option<Child> {
+fn execute_command(
+    args: &Vec<String>,
+    previous: Option<Child>,
+    stdout: Stdio,
+) -> anyhow::Result<Option<Child>> {
     // This is bad
     let mut args_n = vec!["".to_string()];
     args_n.append(&mut args.clone());
@@ -98,18 +143,18 @@ fn execute_command(args: &Vec<String>, previous: Option<Child>, stdout: Stdio) -
     match SpecialBuildin::try_parse_from(args_n) {
         Ok(c) => {
             if let Err(err) = c.execute() {
-                eprintln!("{}: {err}", args[0]);
+                bail!("{}: {err}", args[0]);
             }
-            None
+            Ok(None)
         }
         Err(e) => match e.kind() {
             ErrorKind::DisplayHelp
             | ErrorKind::DisplayHelpOnMissingArgumentOrSubcommand
             | ErrorKind::DisplayVersion => {
                 println!("{e}");
-                None
+                Ok(None)
             }
-            _ => execute_external_command(&args, previous, stdout),
+            _ => execute_external_command(&args, previous, stdout).map(|c| Some(c)),
         },
     }
 }
