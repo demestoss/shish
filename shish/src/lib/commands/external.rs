@@ -9,8 +9,8 @@ pub(crate) fn execute_external_command(
     stdout: Stdio,
 ) -> Option<Child> {
     let Some(command) = get_command_path(&args[0]) else {
-        eprintln!("{command}: command not found");
-        None
+        eprintln!("{}: command not found", args[0]);
+        return None;
     };
     let stdin = previous.map_or(Stdio::inherit(), |output: Child| {
         Stdio::from(output.stdout.unwrap())

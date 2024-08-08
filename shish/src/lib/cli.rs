@@ -1,7 +1,8 @@
-use std::process::Stdio;
-
+use anyhow::bail;
 use clap::error::ErrorKind;
 use clap::Parser;
+use std::fs;
+use std::process::{Child, Stdio};
 
 use crate::commands;
 use crate::commands::external::execute_external_command;
@@ -34,7 +35,7 @@ pub fn handle_user_input(input: &str) {
         return;
     }
 
-    let mut args = shlex::split(input).unwrap_or(Vec::new());
+    let args = shlex::split(input).unwrap_or(Vec::new());
 
     let mut command_args = vec![];
     let mut previous_command = None;
@@ -42,23 +43,14 @@ pub fn handle_user_input(input: &str) {
     for arg in args {
         match arg.as_str() {
             "|" => {
-                match execute_command(&command_args) {
+                match execute_command(&command_args, previous_command, Stdio::piped()) {
+                    Some(command) => previous_command = Some(command),
                     None => previous_command = None,
-                    Some(_) => match execute_external_command(
-                        &command_args,
-                        previous_command,
-                        Stdio::piped(),
-                    ) {
-                        Some(command) => previous_command = Some(command),
-                        None => previous_command = None,
-                    },
                 }
                 command_args.clear();
             }
             "&&" => {
-                if let Some(_) = execute_command(&command_args) {
-                    execute_external_command(&command_args, previous_command, Stdio::inherit());
-                }
+                execute_command(&command_args, previous_command, Stdio::inherit());
                 previous_command = None;
                 command_args.clear();
             }
@@ -66,24 +58,44 @@ pub fn handle_user_input(input: &str) {
         }
     }
 
-    if command_args.len() {
-        execute_external_command(&command_args, previous_command, Stdio::inherit());
+    if command_args.len() > 0 {
+        match get_stdout(&mut command_args) {
+            Ok(stdout) => {
+                execute_command(&command_args, previous_command, stdout).map(|mut c| c.wait());
+            }
+            Err(e) => eprintln!("{e}"),
+        };
     }
 }
 
-fn get_stdout(args: &mut [String]) -> Stdio {
+fn get_stdout(args: &mut Vec<String>) -> anyhow::Result<Stdio> {
+    if args.len() < 3 {
+        return Ok(Stdio::inherit());
+    }
     let Some(arg) = args.get(args.len() - 2) else {
-        return Stdio::inherit();
+        return Ok(Stdio::inherit());
     };
     if arg != ">" {
-        return Stdio::inherit();
+        return Ok(Stdio::inherit());
     }
 
-    let file_name = args.pop();
+    let Some(file_name) = args.pop() else {
+        return Ok(Stdio::inherit());
+    };
+    let _ = args.pop();
+
+    match fs::File::open(&file_name).or(fs::File::create(&file_name)) {
+        Ok(file) => Ok(Stdio::from(file)),
+        Err(e) => bail!("{e}"),
+    }
 }
 
-fn execute_command(args: &[String]) -> Option<()> {
-    match SpecialBuildin::try_parse_from(&args) {
+fn execute_command(args: &Vec<String>, previous: Option<Child>, stdout: Stdio) -> Option<Child> {
+    // This is bad
+    let mut args_n = vec!["".to_string()];
+    args_n.append(&mut args.clone());
+
+    match SpecialBuildin::try_parse_from(args_n) {
         Ok(c) => {
             if let Err(err) = c.execute() {
                 eprintln!("{}: {err}", args[0]);
@@ -91,11 +103,13 @@ fn execute_command(args: &[String]) -> Option<()> {
             None
         }
         Err(e) => match e.kind() {
-            ErrorKind::DisplayHelp => {
+            ErrorKind::DisplayHelp
+            | ErrorKind::DisplayHelpOnMissingArgumentOrSubcommand
+            | ErrorKind::DisplayVersion => {
                 println!("{e}");
                 None
             }
-            _ => Some(()),
+            _ => execute_external_command(&args, previous, stdout),
         },
     }
 }
