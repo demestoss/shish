@@ -1,31 +1,15 @@
 [package]
-name = "shish_buildins"
+name = "shish-buildins-echo"
 version = "0.1.0"
 authors = ["Dmitriy Popov <me@demestoss.com>"]
 edition = "2021"
 
-[[bin]]
-name = "true"
-path = "src/bin/true.rs"
-
-[[bin]]
-name = "false"
-path = "src/bin/false.rs"
-
-[[bin]]
-name = "echo"
-path = "src/bin/echo.rs"
-
-
 [dependencies]
 anyhow = "1.0.68"                                # error handling
-thiserror = "1.0.38"
 clap = { version = "4.5.13", features = ["derive"] }                             # error handling
 rand = "0.8.5"
 colorful = "0.3.2"
 
 [dev-dependencies]
 assert_cmd = "2.0.15"
-predicates = "3.1.2"
 pretty_assertions = "1.4.0"
-

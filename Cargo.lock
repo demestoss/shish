@@ -400,17 +400,38 @@ dependencies = [
 ]
 
 [[package]]
-name = "shish_buildins"
+name = "shish-buildins-cat"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "assert_cmd",
+ "clap",
+ "predicates",
+ "pretty_assertions",
+ "rand",
+]
+
+[[package]]
+name = "shish-buildins-core"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "assert_cmd",
+ "clap",
+ "predicates",
+ "pretty_assertions",
+]
+
+[[package]]
+name = "shish-buildins-echo"
 version = "0.1.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
  "clap",
  "colorful",
- "predicates",
  "pretty_assertions",
  "rand",
- "thiserror",
 ]
 
 [[package]]

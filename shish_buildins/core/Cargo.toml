@@ -1,0 +1,23 @@
+[package]
+name = "shish-buildins-core"
+version = "0.1.0"
+authors = ["Dmitriy Popov <me@demestoss.com>"]
+edition = "2021"
+
+[[bin]]
+name = "true"
+path = "src/bin/true.rs"
+
+[[bin]]
+name = "false"
+path = "src/bin/false.rs"
+
+[dependencies]
+clap = { version = "4.5.13", features = ["derive"] }
+anyhow = "1.0.86"                             # error handling
+
+[dev-dependencies]
+assert_cmd = "2.0.15"
+predicates = "3.1.2"
+pretty_assertions = "1.4.0"
+

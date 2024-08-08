@@ -2,5 +2,5 @@
 resolver = "2"
 members = [
     "shish",
-    "shish_buildins"
+    "shish_buildins/*"
 ]
