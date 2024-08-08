@@ -3,14 +3,14 @@ use colorful::{Colorful, RGB};
 use rand::Rng;
 
 #[derive(Parser, Debug)]
-#[command(about)]
+#[command(about, author, version)]
 /// Prints text to the stdout
 pub struct Command {
     /// Prints in random color
-    #[clap(short = 'r')]
+    #[arg(short = 'r')]
     random_color: bool,
     /// Omit print newline
-    #[clap(short = 'n')]
+    #[arg(short = 'n')]
     no_newline: bool,
 
     /// Input text

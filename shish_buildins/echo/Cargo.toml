@@ -4,6 +4,10 @@ version = "0.1.0"
 authors = ["Dmitriy Popov <me@demestoss.com>"]
 edition = "2021"
 
+[[bin]]
+name = "echo"
+path = "src/echo.rs"
+
 [dependencies]
 anyhow = "1.0.68"                                # error handling
 clap = { version = "4.5.13", features = ["derive"] }                             # error handling
