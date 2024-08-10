@@ -8,9 +8,9 @@ pub(crate) struct Command {
 }
 
 impl Command {
-    pub(crate) fn execute(&self) -> anyhow::Result<()> {
+    pub(crate) fn execute(&self) -> anyhow::Result<i32> {
         if self.path.is_empty() {
-            return Ok(());
+            return Ok(0);
         }
 
         let path = PathBuf::from(&self.path);
@@ -19,9 +19,10 @@ impl Command {
 
         if path_exists {
             std::env::set_current_dir(path)?;
+            Ok(0)
         } else {
             eprintln!("cd: {}: No such file or directory", path.display());
+            Ok(1)
         }
-        Ok(())
     }
 }

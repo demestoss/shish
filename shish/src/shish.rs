@@ -4,7 +4,10 @@ fn main() -> anyhow::Result<()> {
     loop {
         print_line_start()?;
         let command = get_user_input()?;
-        shish::cli::handle_user_input(&command);
+        match shish::cli::handle_user_input(&command) {
+            Err(e) => eprintln!("{e}"),
+            Ok(_) => {}
+        }
     }
 }
 

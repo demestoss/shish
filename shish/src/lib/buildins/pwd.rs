@@ -4,9 +4,9 @@ use clap::Parser;
 pub(crate) struct Command {}
 
 impl Command {
-    pub(crate) fn execute(&self) -> anyhow::Result<()> {
+    pub(crate) fn execute(&self) -> anyhow::Result<i32> {
         let path = std::env::current_dir()?;
         println!("{}", path.display());
-        Ok(())
+        Ok(0)
     }
 }

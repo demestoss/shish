@@ -8,9 +8,9 @@ pub(crate) struct Command {
 }
 
 impl Command {
-    pub(crate) fn execute(&self) -> anyhow::Result<()> {
+    pub(crate) fn execute(&self) -> anyhow::Result<i32> {
         let path = replace_home_dir(self.path.as_path())?;
         println!("{}", path.display());
-        Ok(())
+        Ok(0)
     }
 }

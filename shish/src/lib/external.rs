@@ -40,16 +40,16 @@ fn get_command_path(command_name: &str) -> Option<PathBuf> {
 
 fn find_buildin_path(command: &str) -> Option<PathBuf> {
     match command {
-        "true" | "false" | "echo" => Some(get_buildin_path(&command)),
+        "cat" | "echo" => Some(get_external_buildin_path(&command)),
         _ => None,
     }
 }
 
-fn get_buildin_path(bin: &str) -> PathBuf {
+fn get_external_buildin_path(bin: &str) -> PathBuf {
     if let Ok(exec_path) = env::current_exe() {
         let mut binary_dir = exec_path
             .parent()
-            .unwrap_or_else(|| Path::new("../../../.."))
+            .unwrap_or_else(|| Path::new("../../../../../../.."))
             .to_path_buf();
         binary_dir.push(&bin);
         binary_dir

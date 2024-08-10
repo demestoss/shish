@@ -18,16 +18,24 @@ struct NumberArgs {
     /// Print the line numbers at the start of the line
     #[arg(short = 'n')]
     number_lines: bool,
-    /// Print line number only for nonblank lines
+    /// Print line number only for non-blank lines
     #[arg(short = 'b')]
     number_nonblank_lines: bool,
 }
 
 impl Command {
-    pub fn invoke(&self) {}
+    pub fn invoke(&self) -> anyhow::Result<()> {
+        for filename in self.files.iter() {
+            println!("{filename}");
+        }
+        Ok(())
+    }
 }
 
 pub fn main() {
     let c = Command::parse();
-    c.invoke();
+    if let Err(e) = c.invoke() {
+        eprintln!("{e}");
+        std::process::exit(1);
+    }
 }

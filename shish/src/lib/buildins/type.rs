@@ -7,7 +7,8 @@ pub(crate) struct Command {
 }
 
 impl Command {
-    pub(crate) fn execute(&self) {
+    pub(crate) fn execute(&self) -> anyhow::Result<i32> {
+        let mut code = 0;
         self.command
             .split_whitespace()
             .for_each(|param| match param {
@@ -17,8 +18,12 @@ impl Command {
                 }
                 command => match find_command_path(command) {
                     Some(path) => println!("{command} is {}", path.display()),
-                    None => eprintln!("{param}: not found"),
+                    None => {
+                        code = 1;
+                        eprintln!("{param}: not found");
+                    }
                 },
-            })
+            });
+        Ok(code)
     }
 }
