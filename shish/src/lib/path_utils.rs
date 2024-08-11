@@ -1,9 +1,8 @@
 use glob::MatchOptions;
-use std::env;
 use std::path::{Path, PathBuf};
 
 pub(crate) fn find_command_path(command: &str) -> Option<PathBuf> {
-    let path_env = env::var("PATH").ok()?;
+    let path_env = std::env::var("PATH").ok()?;
     path_env.split(':').find_map(|dir| {
         let path = Path::new(dir).join(command);
         match path.try_exists() {
@@ -35,6 +34,6 @@ pub(crate) fn expand_glob(path: &str) -> anyhow::Result<Vec<String>> {
 
     Ok(paths
         .flatten()
-        .map(|p| p.into_os_string().into_string().unwrap())
+        .map(|p| p.display().to_string())
         .collect::<Vec<_>>())
 }

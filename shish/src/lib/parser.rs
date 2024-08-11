@@ -1,4 +1,4 @@
-use crate::path_utils::{expand_glob, replace_tilde};
+use crate::path_utils;
 
 pub(crate) fn args(input: &str) -> anyhow::Result<Vec<String>> {
     let args = shlex::split(input).unwrap_or(Vec::new());
@@ -6,13 +6,15 @@ pub(crate) fn args(input: &str) -> anyhow::Result<Vec<String>> {
 
     for arg in args {
         let arg = if arg.starts_with('~') {
-            replace_tilde(&arg)
+            path_utils::replace_tilde(&arg)
         } else {
             arg
         };
         if arg.contains('*') {
-            let glob_args = expand_glob(&arg)?;
-            parsed_args.extend(glob_args);
+            match path_utils::expand_glob(&arg) {
+                Ok(glob_args) => parsed_args.extend(glob_args),
+                Err(_) => parsed_args.push(arg),
+            }
         } else {
             parsed_args.push(arg)
         }
