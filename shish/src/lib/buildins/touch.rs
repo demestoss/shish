@@ -1,14 +1,14 @@
 use clap::Parser;
-use std::process;
+use std::path::PathBuf;
 
 #[derive(Parser, Debug)]
 pub(crate) struct Command {
-    status_code: Option<i32>,
+    path: PathBuf,
 }
 
 impl Command {
     pub(crate) fn execute(&self) -> anyhow::Result<i32> {
-        let status_code = self.status_code.unwrap_or(0);
-        process::exit(status_code);
+        println!("{}", self.path.display());
+        Ok(0)
     }
 }

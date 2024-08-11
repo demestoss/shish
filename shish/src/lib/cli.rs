@@ -16,21 +16,20 @@ enum SpecialBuildin {
     Mkdir(buildins::mkdir::Command),
     True(buildins::r#true::Command),
     False(buildins::r#false::Command),
+    Touch(buildins::touch::Command),
 }
 
 impl SpecialBuildin {
     fn execute(&self) -> anyhow::Result<i32> {
         match self {
             SpecialBuildin::Cd(c) => c.execute(),
-            SpecialBuildin::Exit(c) => {
-                c.execute();
-                Ok(0)
-            }
+            SpecialBuildin::Exit(c) => c.execute(),
             SpecialBuildin::Type(c) => c.execute(),
             SpecialBuildin::Pwd(c) => c.execute(),
             SpecialBuildin::Mkdir(c) => c.execute(),
             SpecialBuildin::True(c) => c.execute(),
             SpecialBuildin::False(c) => c.execute(),
+            SpecialBuildin::Touch(c) => c.execute(),
         }
     }
 }
