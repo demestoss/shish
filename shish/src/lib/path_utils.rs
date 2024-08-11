@@ -1,3 +1,4 @@
+use glob::MatchOptions;
 use std::env;
 use std::path::{Path, PathBuf};
 
@@ -12,13 +13,28 @@ pub(crate) fn find_command_path(command: &str) -> Option<PathBuf> {
     })
 }
 
-pub(crate) fn replace_home_dir(path: &Path) -> anyhow::Result<PathBuf> {
-    match path.starts_with("~") {
-        true => {
-            let mut home_dir = PathBuf::from(std::env::var("HOME")?);
-            home_dir.extend(path.iter().skip(1));
-            Ok(home_dir)
+pub(crate) fn replace_tilde(path: &str) -> String {
+    let home_env = std::env::var("HOME");
+    match (path.starts_with("~"), home_env) {
+        (true, Ok(home)) => {
+            format!("{}{}", home, path.chars().skip(1).collect::<String>())
         }
-        false => Ok(path.to_owned()),
+        _ => path.to_owned(),
     }
+}
+
+pub(crate) fn expand_glob(path: &str) -> anyhow::Result<Vec<String>> {
+    let paths = glob::glob_with(
+        path,
+        MatchOptions {
+            case_sensitive: false,
+            require_literal_leading_dot: false,
+            require_literal_separator: false,
+        },
+    )?;
+
+    Ok(paths
+        .flatten()
+        .map(|p| p.into_os_string().into_string().unwrap())
+        .collect::<Vec<_>>())
 }

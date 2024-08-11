@@ -4,8 +4,8 @@ use clap::Parser;
 use std::fs;
 use std::process::{Child, Stdio};
 
-use crate::buildins;
 use crate::external::execute_external_command;
+use crate::{buildins, parser};
 
 #[derive(Debug, Parser)]
 enum SpecialBuildin {
@@ -42,7 +42,7 @@ pub fn handle_user_input(input: &str) -> anyhow::Result<i32> {
         return Ok(0);
     }
 
-    let args = shlex::split(input).unwrap_or(Vec::new());
+    let args = parser::args(&input)?;
 
     let mut command_args = vec![];
     let mut previous_command = None;
@@ -50,17 +50,20 @@ pub fn handle_user_input(input: &str) -> anyhow::Result<i32> {
     for arg in args {
         match arg.as_str() {
             "|" => {
+                let _stdout = get_stdout(&mut command_args)?;
                 match execute_command(&command_args, previous_command, Stdio::piped())? {
                     CommandResult::Code(code) => match code {
                         0 => previous_command = None,
                         c => return Ok(c),
                     },
-                    CommandResult::Child(c) => previous_command = Some(c),
+                    CommandResult::Child(c) => {
+                        previous_command = Some(c);
+                    }
                 };
                 command_args.clear();
             }
             "&&" | "||" => {
-                let stdout = get_stdout(&mut command_args)?;
+                let stdout = get_stdout(&mut command_args)?.unwrap_or(Stdio::inherit());
                 let res = execute_command(&command_args, previous_command, stdout)?;
 
                 if arg == "&&" {
@@ -97,7 +100,7 @@ pub fn handle_user_input(input: &str) -> anyhow::Result<i32> {
     }
 
     if !command_args.is_empty() {
-        let stdout = get_stdout(&mut command_args)?;
+        let stdout = get_stdout(&mut command_args)?.unwrap_or(Stdio::inherit());
         match execute_command(&command_args, previous_command, stdout)? {
             CommandResult::Child(mut c) => {
                 let res = c.wait()?;
@@ -110,26 +113,30 @@ pub fn handle_user_input(input: &str) -> anyhow::Result<i32> {
     }
 }
 
-fn get_stdout(args: &mut Vec<String>) -> anyhow::Result<Stdio> {
-    if args.len() < 3 {
-        return Ok(Stdio::inherit());
-    }
-    let Some(arg) = args.get(args.len() - 2) else {
-        return Ok(Stdio::inherit());
-    };
-    if arg != ">" {
-        return Ok(Stdio::inherit());
+fn get_stdout(args: &mut Vec<String>) -> anyhow::Result<Option<Stdio>> {
+    if !is_valid_redirection(args) {
+        return Ok(None);
     }
 
-    let Some(file_name) = args.pop() else {
-        return Ok(Stdio::inherit());
-    };
-    let _ = args.pop();
+    let file_name = args.pop().unwrap();
+    args.pop(); // Remove the ">" symbol
 
     match fs::File::open(&file_name).or(fs::File::create(&file_name)) {
-        Ok(file) => Ok(Stdio::from(file)),
+        Ok(file) => Ok(Some(Stdio::from(file))),
         Err(e) => bail!("{e}"),
     }
+}
+
+fn is_valid_redirection(args: &Vec<String>) -> bool {
+    if args.len() < 3 {
+        return false;
+    }
+    if let Some(arg) = args.get(args.len() - 2) {
+        if arg == ">" {
+            return true;
+        }
+    }
+    false
 }
 
 enum CommandResult {

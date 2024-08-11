@@ -1,4 +1,3 @@
-use crate::path_utils::replace_home_dir;
 use clap::Parser;
 use std::path::PathBuf;
 
@@ -14,7 +13,6 @@ impl Command {
         }
 
         let path = PathBuf::from(&self.path);
-        let path = replace_home_dir(&path)?;
         let path_exists = path.try_exists()?;
 
         if path_exists {

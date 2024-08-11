@@ -1,4 +1,3 @@
-use crate::path_utils::replace_home_dir;
 use clap::Parser;
 use std::path::PathBuf;
 
@@ -9,8 +8,7 @@ pub(crate) struct Command {
 
 impl Command {
     pub(crate) fn execute(&self) -> anyhow::Result<i32> {
-        let path = replace_home_dir(self.path.as_path())?;
-        println!("{}", path.display());
+        println!("{}", self.path.display());
         Ok(0)
     }
 }
