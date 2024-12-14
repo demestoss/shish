@@ -11,7 +11,8 @@ impl Command {
         let mut code = 0;
         self.command.iter().for_each(|param| match param.as_str() {
             "" => {}
-            "echo" | "exit" | "type" | "pwd" | "cd" | "true" | "false" | "mkdir" => {
+            "cat" | "echo" | "touch" | "exit" | "type" | "pwd" | "cd" | "true" | "false"
+            | "mkdir" => {
                 println!("{param} is a shell builtin")
             }
             command => match find_command_path(command) {

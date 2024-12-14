@@ -10,6 +10,7 @@ pub struct Command {
     /// Print the line numbers at the start of the line
     #[arg(short = 'n', long = "number")]
     number_lines: bool,
+
     /// Print line number only for non-blank lines
     #[arg(short = 'b', long = "number-nonblank", conflicts_with = "number_lines")]
     number_nonblank_lines: bool,
@@ -20,7 +21,7 @@ pub struct Command {
 }
 
 impl Command {
-    pub fn invoke(&self) -> anyhow::Result<()> {
+    pub fn invoke(&self) -> anyhow::Result<i32> {
         for filename in self.files.iter() {
             match open(&filename) {
                 Err(e) => eprintln!("failed to open {filename}: {e}"),
@@ -41,7 +42,7 @@ impl Command {
                 }
             }
         }
-        Ok(())
+        Ok(0)
     }
 }
 
@@ -49,13 +50,5 @@ fn open(filename: &str) -> anyhow::Result<Box<dyn BufRead>> {
     match filename {
         "-" => Ok(Box::new(BufReader::new(io::stdin()))),
         _ => Ok(Box::new(BufReader::new(File::open(filename)?))),
-    }
-}
-
-pub fn main() {
-    let c = Command::parse();
-    if let Err(e) = c.invoke() {
-        eprintln!("{e}");
-        std::process::exit(1);
     }
 }

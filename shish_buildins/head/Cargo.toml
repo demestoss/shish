@@ -1,16 +1,12 @@
 [package]
-name = "buildin_cat"
+name = "shish-buildins-head"
 version = "0.1.0"
 authors = ["Dmitriy Popov <me@demestoss.com>"]
 edition = "2021"
 
 [[bin]]
-name = "cat"
-path = "src/main.rs"
-
-[lib]
-name = "buildin_cat"
-path = "src/lib.rs"
+name = "head"
+path = "src/head.rs"
 
 [dependencies]
 anyhow = "1.0.68"

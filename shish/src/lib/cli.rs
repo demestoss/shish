@@ -17,6 +17,7 @@ enum SpecialBuildin {
     True(buildins::r#true::Command),
     False(buildins::r#false::Command),
     Touch(buildins::touch::Command),
+    Cat(buildin_cat::Command)
 }
 
 impl SpecialBuildin {
@@ -30,6 +31,7 @@ impl SpecialBuildin {
             SpecialBuildin::True(c) => c.execute(),
             SpecialBuildin::False(c) => c.execute(),
             SpecialBuildin::Touch(c) => c.execute(),
+            SpecialBuildin::Cat(c) => c.invoke(),
         }
     }
 }
