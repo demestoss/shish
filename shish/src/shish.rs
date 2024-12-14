@@ -4,15 +4,14 @@ fn main() -> anyhow::Result<()> {
     loop {
         print_line_start()?;
         let command = get_user_input()?;
-        match shish::cli::handle_user_input(&command) {
-            Err(e) => eprintln!("{e}"),
-            Ok(_) => {}
+        if let Err(e) = shish::cli::handle_user_input(&command) {
+            eprintln!("{e}")
         }
     }
 }
 
 fn print_line_start() -> Result<(), io::Error> {
-    print!("€ ");
+    print!("> ");
     io::stdout().flush()
 }
 

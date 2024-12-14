@@ -1,7 +1,7 @@
 use crate::path_utils;
 
 pub(crate) fn args(input: &str) -> anyhow::Result<Vec<String>> {
-    let args = shlex::split(input).unwrap_or(Vec::new());
+    let args = shlex::split(input).unwrap_or_default();
     let mut parsed_args = Vec::new();
 
     for arg in args {

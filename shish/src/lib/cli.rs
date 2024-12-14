@@ -1,37 +1,39 @@
-use anyhow::{anyhow, bail};
+use anyhow::bail;
 use clap::error::ErrorKind;
 use clap::Parser;
 use std::fs;
 use std::process::{Child, Stdio};
 
 use crate::external::execute_external_command;
-use crate::{buildins, parser};
+use crate::parser;
 
 #[derive(Debug, Parser)]
-enum SpecialBuildin {
-    Exit(buildins::exit::Command),
-    Type(buildins::r#type::Command),
-    Pwd(buildins::pwd::Command),
-    Cd(buildins::cd::Command),
-    Mkdir(buildins::mkdir::Command),
-    True(buildins::r#true::Command),
-    False(buildins::r#false::Command),
-    Touch(buildins::touch::Command),
-    Cat(buildin_cat::Command)
+enum Buildin {
+    Exit(buildin_exit::Command),
+    Type(buildin_type::Command),
+    Pwd(buildin_pwd::Command),
+    Cd(buildin_cd::Command),
+    Mkdir(buildin_mkdir::Command),
+    True(buildin_true::Command),
+    False(buildin_false::Command),
+    Touch(buildin_touch::Command),
+    Cat(buildin_cat::Command),
+    Head(buildin_head::Command),
 }
 
-impl SpecialBuildin {
-    fn execute(&self) -> anyhow::Result<i32> {
+impl Buildin {
+    fn invoke(&self) -> anyhow::Result<i32> {
         match self {
-            SpecialBuildin::Cd(c) => c.execute(),
-            SpecialBuildin::Exit(c) => c.execute(),
-            SpecialBuildin::Type(c) => c.execute(),
-            SpecialBuildin::Pwd(c) => c.execute(),
-            SpecialBuildin::Mkdir(c) => c.execute(),
-            SpecialBuildin::True(c) => c.execute(),
-            SpecialBuildin::False(c) => c.execute(),
-            SpecialBuildin::Touch(c) => c.execute(),
-            SpecialBuildin::Cat(c) => c.invoke(),
+            Buildin::Cd(c) => c.invoke(),
+            Buildin::Exit(c) => c.invoke(),
+            Buildin::Type(c) => c.invoke(),
+            Buildin::Pwd(c) => c.invoke(),
+            Buildin::Mkdir(c) => c.invoke(),
+            Buildin::True(c) => c.invoke(),
+            Buildin::False(c) => c.invoke(),
+            Buildin::Touch(c) => c.invoke(),
+            Buildin::Cat(c) => c.invoke(),
+            Buildin::Head(c) => c.invoke(),
         }
     }
 }
@@ -43,7 +45,7 @@ pub fn handle_user_input(input: &str) -> anyhow::Result<i32> {
         return Ok(0);
     }
 
-    let args = parser::args(&input)?;
+    let args = parser::args(input)?;
 
     let mut command_args = vec![];
     let mut previous_command = None;
@@ -53,10 +55,10 @@ pub fn handle_user_input(input: &str) -> anyhow::Result<i32> {
             "|" => {
                 let _stdout = get_stdout(&mut command_args)?;
                 match execute_command(&command_args, previous_command, Stdio::piped())? {
-                    CommandResult::Code(code) => match code {
-                        0 => previous_command = None,
-                        c => return Ok(c),
-                    },
+                    CommandResult::Success => {
+                        previous_command = None;
+                    }
+                    CommandResult::Failure(c) => return Ok(c),
                     CommandResult::Child(c) => {
                         previous_command = Some(c);
                     }
@@ -69,10 +71,8 @@ pub fn handle_user_input(input: &str) -> anyhow::Result<i32> {
 
                 if arg == "&&" {
                     match res {
-                        CommandResult::Code(code) => match code {
-                            0 => {}
-                            c => return Ok(c),
-                        },
+                        CommandResult::Success => {}
+                        CommandResult::Failure(c) => return Ok(c),
                         CommandResult::Child(mut c) => {
                             let res = c.wait()?;
                             if !res.success() {
@@ -82,10 +82,8 @@ pub fn handle_user_input(input: &str) -> anyhow::Result<i32> {
                     }
                 } else if arg == "||" {
                     match res {
-                        CommandResult::Code(code) => match code {
-                            0 => return Ok(0),
-                            _ => {}
-                        },
+                        CommandResult::Success => return Ok(0),
+                        CommandResult::Failure(_) => {}
                         CommandResult::Child(mut c) => {
                             if c.wait()?.success() {
                                 return Ok(0);
@@ -107,7 +105,8 @@ pub fn handle_user_input(input: &str) -> anyhow::Result<i32> {
                 let res = c.wait()?;
                 Ok(res.code().unwrap_or(1))
             }
-            CommandResult::Code(code) => Ok(code),
+            CommandResult::Failure(code) => Ok(code),
+            CommandResult::Success => Ok(0),
         }
     } else {
         Ok(0)
@@ -128,7 +127,7 @@ fn get_stdout(args: &mut Vec<String>) -> anyhow::Result<Option<Stdio>> {
     }
 }
 
-fn is_valid_redirection(args: &Vec<String>) -> bool {
+fn is_valid_redirection(args: &[String]) -> bool {
     if args.len() < 3 {
         return false;
     }
@@ -141,31 +140,37 @@ fn is_valid_redirection(args: &Vec<String>) -> bool {
 }
 
 enum CommandResult {
-    Code(i32),
+    Success,
+    Failure(i32),
     Child(Child),
 }
 
 fn execute_command(
-    args: &Vec<String>,
+    args: &[String],
     previous: Option<Child>,
     stdout: Stdio,
 ) -> anyhow::Result<CommandResult> {
     let mut args_n = vec!["".to_string()];
-    args_n.append(&mut args.clone());
+    args_n.append(&mut args.to_vec());
 
-    match SpecialBuildin::try_parse_from(args_n) {
-        Ok(c) => {
-            let res = c.execute().map_err(|e| anyhow!("{}: {e}", args[0]))?;
-            Ok(CommandResult::Code(res))
-        }
+    match Buildin::try_parse_from(args_n) {
+        Ok(c) => match c.invoke() {
+            Ok(0) => Ok(CommandResult::Success),
+            Ok(c) => Ok(CommandResult::Failure(c)),
+            Err(e) => {
+                eprintln!("{}: {e}", args[0]);
+                // Should pick the error code from error
+                Ok(CommandResult::Failure(1))
+            }
+        },
         Err(e) => match e.kind() {
             ErrorKind::DisplayHelp
             | ErrorKind::DisplayHelpOnMissingArgumentOrSubcommand
             | ErrorKind::DisplayVersion => {
                 println!("{e}");
-                Ok(CommandResult::Code(0))
+                Ok(CommandResult::Success)
             }
-            _ => execute_external_command(&args, previous, stdout).map(|c| CommandResult::Child(c)),
+            _ => execute_external_command(args, previous, stdout).map(CommandResult::Child),
         },
     }
 }

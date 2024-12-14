@@ -112,6 +112,126 @@ dependencies = [
 ]
 
 [[package]]
+name = "buildin_cd"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "assert_cmd",
+ "clap",
+ "predicates",
+ "pretty_assertions",
+ "rand",
+]
+
+[[package]]
+name = "buildin_echo"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "assert_cmd",
+ "clap",
+ "colorful",
+ "pretty_assertions",
+ "rand",
+]
+
+[[package]]
+name = "buildin_exit"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "assert_cmd",
+ "clap",
+ "predicates",
+ "pretty_assertions",
+ "rand",
+]
+
+[[package]]
+name = "buildin_false"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "assert_cmd",
+ "clap",
+ "predicates",
+ "pretty_assertions",
+ "rand",
+]
+
+[[package]]
+name = "buildin_head"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "assert_cmd",
+ "clap",
+ "predicates",
+ "pretty_assertions",
+ "rand",
+]
+
+[[package]]
+name = "buildin_mkdir"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "assert_cmd",
+ "clap",
+ "predicates",
+ "pretty_assertions",
+ "rand",
+]
+
+[[package]]
+name = "buildin_pwd"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "assert_cmd",
+ "clap",
+ "predicates",
+ "pretty_assertions",
+ "rand",
+]
+
+[[package]]
+name = "buildin_touch"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "assert_cmd",
+ "clap",
+ "predicates",
+ "pretty_assertions",
+ "rand",
+]
+
+[[package]]
+name = "buildin_true"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "assert_cmd",
+ "clap",
+ "predicates",
+ "pretty_assertions",
+ "rand",
+]
+
+[[package]]
+name = "buildin_type"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "assert_cmd",
+ "clap",
+ "predicates",
+ "pretty_assertions",
+ "rand",
+]
+
+[[package]]
 name = "byteorder"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -411,6 +531,16 @@ dependencies = [
  "anyhow",
  "assert_cmd",
  "buildin_cat",
+ "buildin_cd",
+ "buildin_echo",
+ "buildin_exit",
+ "buildin_false",
+ "buildin_head",
+ "buildin_mkdir",
+ "buildin_pwd",
+ "buildin_touch",
+ "buildin_true",
+ "buildin_type",
  "clap",
  "colorful",
  "glob",
@@ -418,30 +548,6 @@ dependencies = [
  "rand",
  "shlex",
  "thiserror",
-]
-
-[[package]]
-name = "shish-buildins-echo"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "assert_cmd",
- "clap",
- "colorful",
- "pretty_assertions",
- "rand",
-]
-
-[[package]]
-name = "shish-buildins-head"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "assert_cmd",
- "clap",
- "predicates",
- "pretty_assertions",
- "rand",
 ]
 
 [[package]]
