@@ -172,6 +172,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "buildin_grepr"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "assert_cmd",
+ "buildin",
+ "clap",
+ "predicates",
+ "pretty_assertions",
+]
+
+[[package]]
 name = "buildin_head"
 version = "0.1.0"
 dependencies = [
@@ -554,6 +566,7 @@ dependencies = [
  "buildin_echo",
  "buildin_exit",
  "buildin_false",
+ "buildin_grepr",
  "buildin_head",
  "buildin_mkdir",
  "buildin_pwd",

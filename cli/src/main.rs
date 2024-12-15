@@ -2,7 +2,7 @@ use std::io::{self};
 
 fn main() -> anyhow::Result<()> {
     loop {
-        shish::prompt_print()?;
+        shish::prompt()?;
         let command = get_user_input()?;
         if let Err(e) = shish::handle_user_input(&command) {
             eprintln!("{e}")

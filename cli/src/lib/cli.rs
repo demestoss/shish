@@ -20,6 +20,7 @@ enum Buildin {
     Touch(buildin_touch::Command),
     Cat(buildin_cat::Command),
     Head(buildin_head::Command),
+    Grepr(buildin_grepr::Command),
 }
 
 impl Buildin {
@@ -35,6 +36,7 @@ impl Buildin {
             Buildin::Touch(c) => c.invoke(),
             Buildin::Cat(c) => c.invoke(),
             Buildin::Head(c) => c.invoke(),
+            Buildin::Grepr(c) => c.invoke(),
         }
     }
 }

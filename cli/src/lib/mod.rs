@@ -4,4 +4,4 @@ mod parser;
 mod prompt;
 
 pub use cli::handle_user_input;
-pub use prompt::print as prompt_print;
+pub use prompt::print as prompt;

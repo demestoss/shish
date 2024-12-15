@@ -32,6 +32,7 @@ buildin_pwd = { version = "0.1.0", path = "../buildins/pwd" }
 buildin_touch = { version = "0.1.0", path = "../buildins/touch" }
 buildin_type = { version = "0.1.0", path = "../buildins/type" }
 buildin = { version = "0.1.0", path = "../buildins/buildin" }
+buildin_grepr = { version = "0.1.0", path = "../buildins/grepr" }
 
 [dev-dependencies]
 assert_cmd = "2.0.15"
