@@ -9,7 +9,7 @@ pub(crate) fn execute_external_command(
     stdout: Stdio,
 ) -> anyhow::Result<Child> {
     let Some(command) = find_command_path(&args[0]) else {
-        bail!("{}: command not found", args[0])
+        bail!("shish: command not found: {}", args[0])
     };
     let stdin = previous.map_or(Stdio::inherit(), |output: Child| {
         Stdio::from(output.stdout.unwrap())

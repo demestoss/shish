@@ -20,7 +20,7 @@ impl Invoke for Command {
             std::env::set_current_dir(path)?;
             Ok(0)
         } else {
-            eprintln!("cd: {}: No such file or directory", path.display());
+            eprintln!("No such file or directory: {}", path.display());
             Ok(1)
         }
     }

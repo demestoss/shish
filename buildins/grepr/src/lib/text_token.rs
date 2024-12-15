@@ -2,6 +2,7 @@ use std::str::Bytes;
 
 use crate::{pattern::Pattern, pattern_list::PatternList};
 
+#[warn(variant_size_differences)]
 #[derive(Clone, Debug)]
 pub enum TextToken {
     Alteration(Vec<PatternList>),

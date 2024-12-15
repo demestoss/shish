@@ -1,15 +1,37 @@
 use buildin::Invoke;
 use clap::Parser;
-use std::path::PathBuf;
 
 #[derive(Parser, Debug)]
+#[command(about, author, version)]
+/// Make directory in the current directory
 pub struct Command {
-    path: PathBuf,
+    /// Create nested directories if it was provided in the name
+    #[arg(short = 'p', default_value_t = true)]
+    parent: bool,
+
+    /// The name(s) of the directory(ies) to create
+    dirs: Vec<String>,
 }
 
 impl Invoke for Command {
     fn invoke(&self) -> anyhow::Result<i32> {
-        println!("Not implemented: {}", self.path.display());
+        for dir in self.dirs.iter() {
+            if std::fs::metadata(dir).is_ok() {
+                eprintln!("mkdir: Directory already exists: {dir}");
+                continue;
+            }
+
+            let res = if self.parent {
+                std::fs::create_dir_all(dir)
+            } else {
+                std::fs::create_dir(dir)
+            };
+
+            if let Err(e) = res {
+                eprintln!("mkdir: Failed to create directory: {dir}; {e}")
+            }
+        }
+
         Ok(0)
     }
 }

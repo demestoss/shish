@@ -1,3 +1,4 @@
+#[warn(variant_size_differences)]
 pub enum TokenModifier {
     Optional,
     OneOrMore,

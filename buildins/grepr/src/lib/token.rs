@@ -2,6 +2,7 @@ use crate::text_token::TextToken;
 use std::cmp::PartialEq;
 use std::str::Bytes;
 
+#[warn(variant_size_differences)]
 #[derive(Clone, Debug)]
 pub(crate) enum Token {
     Char(CharToken),
@@ -17,6 +18,7 @@ impl Token {
     }
 }
 
+#[warn(variant_size_differences)]
 #[derive(PartialEq, Clone, Debug)]
 pub enum CharToken {
     Exact(u8),
