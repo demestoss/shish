@@ -1,3 +1,4 @@
+use buildin::Invoke;
 use clap::Parser;
 use std::process;
 
@@ -6,8 +7,8 @@ pub struct Command {
     status_code: Option<i32>,
 }
 
-impl Command {
-    pub fn invoke(&self) -> anyhow::Result<i32> {
+impl Invoke for Command {
+    fn invoke(&self) -> anyhow::Result<i32> {
         let status_code = self.status_code.unwrap_or(0);
         process::exit(status_code);
     }

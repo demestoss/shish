@@ -1,18 +1,13 @@
-use std::io::{self, Write};
+use std::io::{self};
 
 fn main() -> anyhow::Result<()> {
     loop {
-        print_line_start()?;
+        shish::prompt_print()?;
         let command = get_user_input()?;
-        if let Err(e) = shish::cli::handle_user_input(&command) {
+        if let Err(e) = shish::handle_user_input(&command) {
             eprintln!("{e}")
         }
     }
-}
-
-fn print_line_start() -> Result<(), io::Error> {
-    print!("> ");
-    io::stdout().flush()
 }
 
 fn get_user_input() -> Result<String, io::Error> {

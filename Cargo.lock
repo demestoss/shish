@@ -100,11 +100,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "buildin"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+]
+
+[[package]]
 name = "buildin_cat"
 version = "0.1.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
+ "buildin",
  "clap",
  "predicates",
  "pretty_assertions",
@@ -117,6 +125,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
+ "buildin",
  "clap",
  "predicates",
  "pretty_assertions",
@@ -129,6 +138,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
+ "buildin",
  "clap",
  "colorful",
  "pretty_assertions",
@@ -141,6 +151,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
+ "buildin",
  "clap",
  "predicates",
  "pretty_assertions",
@@ -153,6 +164,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
+ "buildin",
  "clap",
  "predicates",
  "pretty_assertions",
@@ -165,6 +177,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
+ "buildin",
  "clap",
  "predicates",
  "pretty_assertions",
@@ -177,6 +190,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
+ "buildin",
  "clap",
  "predicates",
  "pretty_assertions",
@@ -189,6 +203,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
+ "buildin",
  "clap",
  "predicates",
  "pretty_assertions",
@@ -201,6 +216,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
+ "buildin",
  "clap",
  "predicates",
  "pretty_assertions",
@@ -213,6 +229,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
+ "buildin",
  "clap",
  "predicates",
  "pretty_assertions",
@@ -225,6 +242,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
+ "buildin",
  "clap",
  "predicates",
  "pretty_assertions",
@@ -530,6 +548,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
+ "buildin",
  "buildin_cat",
  "buildin_cd",
  "buildin_echo",

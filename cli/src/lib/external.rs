@@ -1,5 +1,5 @@
-use crate::path_utils::find_command_path;
 use anyhow::bail;
+use std::path::{Path, PathBuf};
 use std::process;
 use std::process::{Child, Stdio};
 
@@ -25,4 +25,15 @@ pub(crate) fn execute_external_command(
             bail!("{}: {}", args[0], e)
         }
     }
+}
+
+fn find_command_path(command: &str) -> Option<PathBuf> {
+    let path_env = std::env::var("PATH").ok()?;
+    path_env.split(':').find_map(|dir| {
+        let path = Path::new(dir).join(command);
+        match path.try_exists() {
+            Ok(true) => Some(path),
+            _ => None,
+        }
+    })
 }

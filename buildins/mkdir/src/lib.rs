@@ -1,3 +1,4 @@
+use buildin::Invoke;
 use clap::Parser;
 use std::path::PathBuf;
 
@@ -6,8 +7,8 @@ pub struct Command {
     path: PathBuf,
 }
 
-impl Command {
-    pub fn invoke(&self) -> anyhow::Result<i32> {
+impl Invoke for Command {
+    fn invoke(&self) -> anyhow::Result<i32> {
         println!("Not implemented: {}", self.path.display());
         Ok(0)
     }

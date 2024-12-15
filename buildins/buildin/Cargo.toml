@@ -1,0 +1,11 @@
+[package]
+name = "buildin"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "buildin"
+path = "./src/lib.rs"
+
+[dependencies]
+anyhow = "1.0.94"
