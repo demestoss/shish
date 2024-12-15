@@ -1,0 +1,24 @@
+[package]
+name = "buildin_echo"
+version = "0.1.0"
+authors = ["Dmitriy Popov <me@demestoss.com>"]
+edition = "2021"
+
+[[bin]]
+name = "echo"
+path = "src/main.rs"
+
+[lib]
+name = "buildin_echo"
+path = "src/lib.rs"
+
+[dependencies]
+anyhow = "1.0.68"
+clap = { version = "4.5.13", features = ["derive"] }
+rand = "0.8.5"
+colorful = "0.3.2"
+buildin = { version = "0.1.0", path = "../buildin" }
+
+[dev-dependencies]
+assert_cmd = "2.0.15"
+pretty_assertions = "1.4.0"

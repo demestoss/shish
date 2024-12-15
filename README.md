@@ -1,36 +1,27 @@
-[![progress-banner](https://backend.codecrafters.io/progress/shell/7aa911e8-d417-4d99-8338-9c1cfe50eb0a)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
+# ShiSh (sheeeeesh) - my shell implementation in Rust
 
-This is a starting point for Rust solutions to the
-["Build Your Own Shell" Challenge](https://app.codecrafters.io/courses/shell/overview).
+Just pet shell to run OS commands with some small useful built-in commands. Architecture build that way so it could be easy to run buildin commands as a separate CLI tools or as a library code.
 
-In this challenge, you'll build your own POSIX compliant shell that's capable of
-interpreting shell commands, running external programs and builtin commands like
-cd, pwd, echo and more. Along the way, you'll learn about shell command parsing,
-REPLs, builtin commands, and more.
+My playgroud to add cli commands, utilities, configs, etc.
 
-**Note**: If you're viewing this repo on GitHub, head over to
-[codecrafters.io](https://codecrafters.io) to try the challenge.
+## Shell features
 
-# Passing the first stage
+- Support some default operations like: `|`, `&&`, `||`, `>`;
+- Expand `*` glob pattern in arguments and auto replace `~` with user home directory.
 
-The entry point for your `shell` implementation is in `src/main.rs`. Study and
-uncomment the relevant code, and push your changes to pass the first stage:
+## Buildins
 
-```sh
-git add .
-git commit -m "pass 1st stage" # any msg
-git push origin master
-```
-
-Time to move on to the next stage!
-
-# Stage 2 & beyond
-
-Note: This section is for stages 2 and beyond.
-
-1. Ensure you have `cargo (1.70)` installed locally
-1. Run `./your_program.sh` to run your program, which is implemented in
-   `src/main.rs`. This command compiles your Rust project, so it might be slow
-   the first time you run it. Subsequent runs will be fast.
-1. Commit your changes and run `git push origin master` to submit your solution
-   to CodeCrafters. Test output will be streamed to your terminal.
+- `cd`
+- `cat`
+- `cat`
+- `cd`
+- `echo`
+- `exit`
+- `false`
+- `grepr (grep)`
+- `head`
+- `mkdir`
+- `pwd`
+- `touch`
+- `true`
+- `type`

@@ -1,0 +1,24 @@
+[package]
+name = "buildin_false"
+version = "0.1.0"
+authors = ["Dmitriy Popov <me@demestoss.com>"]
+edition = "2021"
+
+[[bin]]
+name = "false"
+path = "src/main.rs"
+
+[lib]
+name = "buildin_false"
+path = "src/lib.rs"
+
+[dependencies]
+anyhow = "1.0.68"
+buildin = { version = "0.1.0", path = "../buildin" }
+clap = { version = "4.5.13", features = ["derive"] }
+
+[dev-dependencies]
+assert_cmd = "2.0.15"
+predicates = "3.1.2"
+pretty_assertions = "1.4.0"
+rand = "0.8.5"
