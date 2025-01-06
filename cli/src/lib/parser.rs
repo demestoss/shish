@@ -1,3 +1,5 @@
+use std::path::{Path, PathBuf};
+
 use glob::MatchOptions;
 
 pub(crate) fn args(input: &str) -> anyhow::Result<Vec<String>> {
@@ -5,11 +7,7 @@ pub(crate) fn args(input: &str) -> anyhow::Result<Vec<String>> {
     let mut parsed_args = Vec::new();
 
     for arg in args {
-        let arg = if arg.starts_with('~') {
-            replace_tilde(&arg)
-        } else {
-            arg
-        };
+        let arg = replace_tilde_with_home(&arg);
         if arg.contains('*') {
             match expand_glob(&arg) {
                 Ok(glob_args) => parsed_args.extend(glob_args),
@@ -23,19 +21,37 @@ pub(crate) fn args(input: &str) -> anyhow::Result<Vec<String>> {
     Ok(parsed_args)
 }
 
-fn replace_tilde(path: &str) -> String {
+fn replace_tilde_with_home<T>(path: T) -> String
+where
+    T: AsRef<str>,
+{
     let home_env = std::env::var("HOME");
-    match (path.starts_with("~"), home_env) {
-        (true, Ok(home)) => {
-            format!("{}{}", home, path.chars().skip(1).collect::<String>())
+    let path = path.as_ref();
+    match (path.strip_prefix("~"), home_env) {
+        (Some(rest_path), Ok(home)) => {
+            format!("{home}{rest_path}")
         }
         _ => path.to_owned(),
     }
 }
 
-fn expand_glob(path: &str) -> anyhow::Result<Vec<String>> {
+pub fn replace_home_with_tilde<T>(path: T) -> PathBuf
+where
+    T: AsRef<Path>,
+{
+    let path = path.as_ref();
+    let Ok(home) = std::env::var("HOME") else {
+        return path.to_owned();
+    };
+    match path.strip_prefix(home) {
+        Ok(rest_path) => PathBuf::from("~").join(rest_path),
+        _ => path.to_owned(),
+    }
+}
+
+fn expand_glob<T: AsRef<str>>(path: T) -> anyhow::Result<Vec<String>> {
     let paths = glob::glob_with(
-        path,
+        path.as_ref(),
         MatchOptions {
             case_sensitive: false,
             require_literal_leading_dot: false,

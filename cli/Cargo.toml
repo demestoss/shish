@@ -10,7 +10,7 @@ path = "./src/lib/mod.rs"
 
 [[bin]]
 name = "shish"
-path = "./src/main.rs"
+path = "./src/bin/shish.rs"
 
 [dependencies]
 anyhow = "1.0.68"                                # error handling
