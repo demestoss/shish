@@ -1,45 +1,12 @@
 use anyhow::bail;
-use buildin::Invoke;
 use clap::error::ErrorKind;
 use clap::Parser;
 use std::fs;
 use std::process::{Child, Stdio};
 
+use crate::buildin::Buildin;
 use crate::external::execute_external_command;
 use crate::parser;
-
-#[derive(Debug, Parser)]
-enum Buildin {
-    Exit(buildin_exit::Command),
-    Type(buildin_type::Command),
-    Pwd(buildin_pwd::Command),
-    Cd(buildin_cd::Command),
-    Mkdir(buildin_mkdir::Command),
-    True(buildin_true::Command),
-    False(buildin_false::Command),
-    Touch(buildin_touch::Command),
-    Cat(buildin_cat::Command),
-    Head(buildin_head::Command),
-    Grepr(buildin_grepr::Command),
-}
-
-impl Buildin {
-    fn invoke(&self) -> anyhow::Result<i32> {
-        match self {
-            Buildin::Cd(c) => c.invoke(),
-            Buildin::Exit(c) => c.invoke(),
-            Buildin::Type(c) => c.invoke(),
-            Buildin::Pwd(c) => c.invoke(),
-            Buildin::Mkdir(c) => c.invoke(),
-            Buildin::True(c) => c.invoke(),
-            Buildin::False(c) => c.invoke(),
-            Buildin::Touch(c) => c.invoke(),
-            Buildin::Cat(c) => c.invoke(),
-            Buildin::Head(c) => c.invoke(),
-            Buildin::Grepr(c) => c.invoke(),
-        }
-    }
-}
 
 pub fn handle_user_input(input: &str) -> anyhow::Result<i32> {
     let input = input.trim();
