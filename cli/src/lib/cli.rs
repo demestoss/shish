@@ -1,11 +1,8 @@
 use anyhow::bail;
-use clap::error::ErrorKind;
-use clap::Parser;
 use std::fs;
-use std::process::{Child, Stdio};
+use std::process::Stdio;
 
-use crate::buildin::Buildin;
-use crate::external::execute_external_command;
+use crate::command::execute_command;
 use crate::parser;
 
 pub fn handle_user_input(input: &str) -> anyhow::Result<i32> {
@@ -24,42 +21,21 @@ pub fn handle_user_input(input: &str) -> anyhow::Result<i32> {
         match arg.as_str() {
             "|" => {
                 let _stdout = get_stdout(&mut command_args)?;
-                match execute_command(&command_args, previous_command, Stdio::piped())? {
-                    CommandResult::Success => {
-                        previous_command = None;
-                    }
-                    CommandResult::Failure(c) => return Ok(c),
-                    CommandResult::Child(c) => {
-                        previous_command = Some(c);
-                    }
-                };
+                let c = execute_command(&command_args, previous_command, Stdio::piped())?;
+                previous_command = Some(c);
                 command_args.clear();
             }
             "&&" | "||" => {
                 let stdout = get_stdout(&mut command_args)?.unwrap_or(Stdio::inherit());
-                let res = execute_command(&command_args, previous_command, stdout)?;
+                let mut c = execute_command(&command_args, previous_command, stdout)?;
 
                 if arg == "&&" {
-                    match res {
-                        CommandResult::Success => {}
-                        CommandResult::Failure(c) => return Ok(c),
-                        CommandResult::Child(mut c) => {
-                            let res = c.wait()?;
-                            if !res.success() {
-                                return Ok(res.code().unwrap_or(1));
-                            }
-                        }
+                    let res = c.wait()?;
+                    if !res.success() {
+                        return Ok(res.code().unwrap_or(1));
                     }
-                } else if arg == "||" {
-                    match res {
-                        CommandResult::Success => return Ok(0),
-                        CommandResult::Failure(_) => {}
-                        CommandResult::Child(mut c) => {
-                            if c.wait()?.success() {
-                                return Ok(0);
-                            }
-                        }
-                    }
+                } else if arg == "||" && c.wait()?.success() {
+                    return Ok(0);
                 }
                 previous_command = None;
                 command_args.clear();
@@ -70,14 +46,9 @@ pub fn handle_user_input(input: &str) -> anyhow::Result<i32> {
 
     if !command_args.is_empty() {
         let stdout = get_stdout(&mut command_args)?.unwrap_or(Stdio::inherit());
-        match execute_command(&command_args, previous_command, stdout)? {
-            CommandResult::Child(mut c) => {
-                let res = c.wait()?;
-                Ok(res.code().unwrap_or(1))
-            }
-            CommandResult::Failure(code) => Ok(code),
-            CommandResult::Success => Ok(0),
-        }
+        let mut c = execute_command(&command_args, previous_command, stdout)?;
+        let res = c.wait()?;
+        Ok(res.code().unwrap_or(1))
     } else {
         Ok(0)
     }
@@ -107,40 +78,4 @@ fn is_valid_redirection(args: &[String]) -> bool {
         }
     }
     false
-}
-
-enum CommandResult {
-    Success,
-    Failure(i32),
-    Child(Child),
-}
-
-fn execute_command(
-    args: &[String],
-    previous: Option<Child>,
-    stdout: Stdio,
-) -> anyhow::Result<CommandResult> {
-    let mut args_n = vec!["".to_string()];
-    args_n.append(&mut args.to_vec());
-
-    match Buildin::try_parse_from(args_n) {
-        Ok(c) => match c.invoke() {
-            Ok(0) => Ok(CommandResult::Success),
-            Ok(c) => Ok(CommandResult::Failure(c)),
-            Err(e) => {
-                eprintln!("{}: {e}", args[0]);
-                // Should pick the error code from error
-                Ok(CommandResult::Failure(1))
-            }
-        },
-        Err(e) => match e.kind() {
-            ErrorKind::DisplayHelp
-            | ErrorKind::DisplayHelpOnMissingArgumentOrSubcommand
-            | ErrorKind::DisplayVersion => {
-                println!("{e}");
-                Ok(CommandResult::Success)
-            }
-            _ => execute_external_command(args, previous, stdout).map(CommandResult::Child),
-        },
-    }
 }

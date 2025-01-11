@@ -1,4 +1,3 @@
-use buildin::Invoke;
 use clap::Parser;
 use std::fs::File;
 use std::io;
@@ -21,9 +20,9 @@ pub struct Command {
     files: Vec<String>,
 }
 
-impl Invoke for Command {
-    fn invoke(&self) -> anyhow::Result<i32> {
-        Ok(0)
+impl Command {
+    pub fn invoke(&self) -> anyhow::Result<()> {
+        Ok(())
     }
 }
 

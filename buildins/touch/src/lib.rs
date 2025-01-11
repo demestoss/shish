@@ -1,5 +1,4 @@
 use anyhow::{anyhow, Context};
-use buildin::Invoke;
 use chrono::NaiveDateTime;
 use clap::Parser;
 use std::{
@@ -23,18 +22,16 @@ pub struct Command {
     files: Vec<String>,
 }
 
-impl Invoke for Command {
-    fn invoke(&self) -> anyhow::Result<i32> {
+impl Command {
+    pub fn invoke(&self) -> anyhow::Result<()> {
         for file in self.files.iter() {
             if let Err(e) = self.file_proceed(file) {
                 eprintln!("touch: Failed {file}: {e}")
             }
         }
-        Ok(0)
+        Ok(())
     }
-}
 
-impl Command {
     fn file_proceed(&self, file: &str) -> anyhow::Result<()> {
         let stats = std::fs::metadata(file);
 
@@ -57,7 +54,9 @@ impl Command {
             Some(timestamp) => {
                 let datetime = parse_custom_timestamp(timestamp)?;
                 SystemTime::UNIX_EPOCH
-                    .checked_add(std::time::Duration::from_secs(datetime.timestamp() as u64))
+                    .checked_add(std::time::Duration::from_secs(
+                        datetime.and_utc().timestamp() as u64,
+                    ))
                     .context("Failed to convert into system time")?
             }
         };

@@ -1,5 +1,5 @@
 [package]
-name = "buildin_grepr"
+name = "buildin_grep"
 version = "0.1.0"
 authors = ["Dmitriy Popov <me@demestoss.com>"]
 edition = "2021"
@@ -9,7 +9,7 @@ name = "grepr"
 path = "src/main.rs"
 
 [lib]
-name = "buildin_grepr"
+name = "buildin_grep"
 path = "src/lib/mod.rs"
 
 [dependencies]

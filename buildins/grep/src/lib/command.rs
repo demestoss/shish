@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use buildin::Invoke;
+use anyhow::bail;
 use clap::Parser;
 
 use crate::Pattern;
@@ -17,8 +17,8 @@ pub struct Command {
     pattern: String,
 }
 
-impl Invoke for Command {
-    fn invoke(&self) -> anyhow::Result<i32> {
+impl Command {
+    pub fn invoke(&self) -> anyhow::Result<()> {
         let mut input_line = String::new();
 
         std::io::stdin().read_line(&mut input_line).unwrap();
@@ -28,9 +28,9 @@ impl Invoke for Command {
         let res = pattern.match_line(input_line)?;
 
         if res {
-            Ok(0)
+            Ok(())
         } else {
-            Ok(1)
+            bail!("")
         }
     }
 }

@@ -1,4 +1,3 @@
-use buildin::Invoke;
 use clap::Parser;
 
 #[derive(Parser, Debug)]
@@ -13,8 +12,8 @@ pub struct Command {
     dirs: Vec<String>,
 }
 
-impl Invoke for Command {
-    fn invoke(&self) -> anyhow::Result<i32> {
+impl Command {
+    pub fn invoke(&self) -> anyhow::Result<()> {
         for dir in self.dirs.iter() {
             if std::fs::metadata(dir).is_ok() {
                 eprintln!("mkdir: Directory already exists: {dir}");
@@ -28,10 +27,10 @@ impl Invoke for Command {
             };
 
             if let Err(e) = res {
-                eprintln!("mkdir: Failed to create directory: {dir}; {e}")
+                eprintln!("mkdir: Failed to create directory: {dir}; {e}");
             }
         }
 
-        Ok(0)
+        Ok(())
     }
 }

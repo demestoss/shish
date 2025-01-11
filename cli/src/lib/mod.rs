@@ -1,6 +1,5 @@
 mod cli;
-mod external;
-mod buildin;
+mod command;
 mod parser;
 mod prompt;
 
