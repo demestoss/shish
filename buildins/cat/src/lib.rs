@@ -1,3 +1,4 @@
+// #![warn(missing_debug_implementations, missing_docs)]
 use clap::Parser;
 use std::fs::File;
 use std::io;
