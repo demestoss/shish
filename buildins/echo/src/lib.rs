@@ -1,4 +1,3 @@
-use buildin::Invoke;
 use clap::Parser;
 use colorful::{Colorful, RGB};
 use rand::Rng;
@@ -19,8 +18,8 @@ pub struct Command {
     text: Vec<String>,
 }
 
-impl Invoke for Command {
-    fn invoke(&self) -> anyhow::Result<i32> {
+impl Command {
+    pub fn invoke(&self) -> anyhow::Result<()> {
         let output = self.text.join(" ");
         let output = if self.random_color {
             let (r, g, b) = random_color();
@@ -31,7 +30,7 @@ impl Invoke for Command {
 
         let line_end = if self.no_newline { "" } else { "\n" };
         print!("{output}{line_end}");
-        Ok(0)
+        Ok(())
     }
 }
 

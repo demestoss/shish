@@ -1,14 +1,10 @@
-use buildin::Invoke;
 use buildin_head::Command;
 use clap::Parser;
 
 pub fn main() {
     let c = Command::parse();
-    match c.invoke() {
-        Ok(c) => std::process::exit(c),
-        Err(e) => {
-            eprintln!("{e}");
-            std::process::exit(1);
-        }
+    if let Err(e) = c.invoke() {
+        eprintln!("{e}");
+        std::process::exit(1);
     }
 }

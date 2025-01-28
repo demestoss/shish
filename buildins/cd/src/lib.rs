@@ -1,4 +1,4 @@
-use buildin::Invoke;
+use anyhow::bail;
 use clap::Parser;
 use std::path::PathBuf;
 
@@ -7,10 +7,10 @@ pub struct Command {
     path: String,
 }
 
-impl Invoke for Command {
-    fn invoke(&self) -> anyhow::Result<i32> {
+impl Command {
+    pub fn invoke(&self) -> anyhow::Result<()> {
         if self.path.is_empty() {
-            return Ok(0);
+            return Ok(());
         }
 
         let path = PathBuf::from(&self.path);
@@ -18,10 +18,9 @@ impl Invoke for Command {
 
         if path_exists {
             std::env::set_current_dir(path)?;
-            Ok(0)
+            Ok(())
         } else {
-            eprintln!("No such file or directory: {}", path.display());
-            Ok(1)
+            bail!("No such file or directory: {}", path.display())
         }
     }
 }

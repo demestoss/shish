@@ -1,6 +1,5 @@
 use std::path::{Path, PathBuf};
 
-use buildin::Invoke;
 use clap::Parser;
 
 #[derive(Parser, Debug)]
@@ -8,13 +7,13 @@ pub struct Command {
     command: Vec<String>,
 }
 
-impl Invoke for Command {
-    fn invoke(&self) -> anyhow::Result<i32> {
+impl Command {
+    pub fn invoke(&self) -> anyhow::Result<i32> {
         let mut code = 0;
         self.command.iter().for_each(|param| match param.as_str() {
             "" => {}
-            "cat" | "echo" | "touch" | "exit" | "type" | "pwd" | "cd" | "true" | "false" | "head" | "grepr"
-            | "mkdir" => {
+            "cat" | "echo" | "touch" | "exit" | "type" | "pwd" | "cd" | "true" | "false"
+            | "head" | "grepr" | "mkdir" => {
                 println!("{param} is a shell builtin")
             }
             command => match find_command_path(command) {

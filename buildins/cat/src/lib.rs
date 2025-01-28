@@ -1,4 +1,4 @@
-use buildin::Invoke;
+// #![warn(missing_debug_implementations, missing_docs)]
 use clap::Parser;
 use std::fs::File;
 use std::io;
@@ -21,8 +21,8 @@ pub struct Command {
     files: Vec<String>,
 }
 
-impl Invoke for Command {
-    fn invoke(&self) -> anyhow::Result<i32> {
+impl Command {
+    pub fn invoke(&self) {
         for filename in self.files.iter() {
             match open(filename) {
                 Err(e) => eprintln!("failed to open {filename}: {e}"),
@@ -43,7 +43,6 @@ impl Invoke for Command {
                 }
             }
         }
-        Ok(0)
     }
 }
 

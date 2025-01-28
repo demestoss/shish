@@ -1,4 +1,4 @@
-use buildin_grepr::Pattern;
+use buildin_grep::Pattern;
 use std::str::FromStr;
 
 fn test_match(input: &str, pattern_str: &str, expected: bool) {

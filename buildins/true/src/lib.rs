@@ -1,12 +1,11 @@
-use buildin::Invoke;
 use clap::Parser;
 
 #[derive(Parser, Debug)]
-#[command(about = "Always returns failure 1 exit code")]
+#[command(about = "Always returns success 0 status code")]
 pub struct Command {}
 
-impl Invoke for Command {
-    fn invoke(&self) -> anyhow::Result<i32> {
-        Ok(1)
+impl Command {
+    pub fn invoke(&self) {
+        std::process::exit(0);
     }
 }
